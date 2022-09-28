@@ -29,6 +29,14 @@ const $plays = {
 };
 
 const statement = (invoice, plays) => {
+  const totalPee = () => {
+    let totalAmount = 0;
+    for (let perf of invoice.performances) {
+      totalAmount += amountFor(perf);
+    }
+    return totalAmount;
+  };
+
   const totalVolumeCredits = () => {
     let volumeCredits = 0;
     for (let perf of invoice.performances) {
@@ -85,7 +93,6 @@ const statement = (invoice, plays) => {
     return volumeCredits;
   };
 
-  let totalAmount = 0;
   let result = `청구내역 (고객명 : ${invoice.customer})\n`;
 
   for (let perf of invoice.performances) {
@@ -93,10 +100,9 @@ const statement = (invoice, plays) => {
     result += `${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
       perf.audience
     }석)\n`;
-    totalAmount += amountFor(perf);
   }
 
-  result += `총액: ${usd(totalAmount / 100)}\n`;
+  result += `총액: ${usd(totalPee() / 100)}\n`;
   result += `적립 포인트: ${totalVolumeCredits()}점\n`;
   return result;
 };
