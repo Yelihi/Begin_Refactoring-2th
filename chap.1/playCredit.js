@@ -29,6 +29,14 @@ const $plays = {
 };
 
 const statement = (invoice, plays) => {
+  const totalVolumeCredits = () => {
+    let volumeCredits = 0;
+    for (let perf of invoice.performances) {
+      volumeCredits += volumeCreditsFor(perf);
+    }
+    return volumeCredits;
+  };
+
   const usd = (aNumber) => {
     // 매개변수 데이터타입을 적어주면 좋다.
     return new Intl.NumberFormat("en-US", {
@@ -78,13 +86,9 @@ const statement = (invoice, plays) => {
   };
 
   let totalAmount = 0;
-  let volumeCredits = 0;
   let result = `청구내역 (고객명 : ${invoice.customer})\n`;
 
   for (let perf of invoice.performances) {
-    // 포인트를 적립한다.
-    volumeCredits += volumeCreditsFor(perf);
-
     //청구내역을 출력한다.
     result += `${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
       perf.audience
@@ -93,7 +97,7 @@ const statement = (invoice, plays) => {
   }
 
   result += `총액: ${usd(totalAmount / 100)}\n`;
-  result += `적립 포인트: ${volumeCredits}점\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
   return result;
 };
 
