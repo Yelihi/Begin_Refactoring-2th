@@ -30,19 +30,19 @@ const $plays = {
 
 const statement = (invoice, plays) => {
   const totalPee = () => {
-    let totalAmount = 0;
+    let result = 0;
     for (let perf of invoice.performances) {
-      totalAmount += amountFor(perf);
+      result += amountFor(perf);
     }
-    return totalAmount;
+    return result;
   };
 
   const totalVolumeCredits = () => {
-    let volumeCredits = 0;
+    let result = 0;
     for (let perf of invoice.performances) {
-      volumeCredits += volumeCreditsFor(perf);
+      result += volumeCreditsFor(perf);
     }
-    return volumeCredits;
+    return result;
   };
 
   const usd = (aNumber) => {
@@ -86,11 +86,11 @@ const statement = (invoice, plays) => {
   };
 
   const volumeCreditsFor = (perf) => {
-    let volumeCredits = 0;
-    volumeCredits += Math.max(perf.audience - 30, 0);
+    let result = 0;
+    result += Math.max(perf.audience - 30, 0);
     if ("comedy" === playFor(perf).type)
-      volumeCredits += Math.floor(perf.audience / 5);
-    return volumeCredits;
+      result += Math.floor(perf.audience / 5);
+    return result;
   };
 
   let result = `청구내역 (고객명 : ${invoice.customer})\n`;
