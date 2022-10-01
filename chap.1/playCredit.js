@@ -28,38 +28,55 @@ const $plays = {
   "othe-llo": { name: "Othello", type: "tragedy" },
 };
 
-const statement = (invoice, plays) => {
-  const totalPee = () => {
+// function statement(invoice, plays) {
+//   return renderPlainText(invoice, plays);
+// }
+
+function renderPlainText(invoice, plays) {
+  let result = `청구내역 (고객명 : ${invoice.customer})\n`;
+
+  for (let perf of invoice.performances) {
+    //청구내역을 출력한다.
+    result += `${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
+      perf.audience
+    }석)\n`;
+  }
+
+  result += `총액: ${usd(totalPee() / 100)}\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+  return result;
+
+  function totalPee() {
     let result = 0;
     for (let perf of invoice.performances) {
       result += amountFor(perf);
     }
     return result;
-  };
+  }
 
-  const totalVolumeCredits = () => {
+  function totalVolumeCredits() {
     let result = 0;
     for (let perf of invoice.performances) {
       result += volumeCreditsFor(perf);
     }
     return result;
-  };
+  }
 
-  const usd = (aNumber) => {
+  function usd(aNumber) {
     // 매개변수 데이터타입을 적어주면 좋다.
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFactionDigits: 2,
     }).format(aNumber);
-  };
+  }
 
-  const playFor = (aPerformance) => {
+  function playFor(aPerformance) {
     // 임시 변수를 질의 함수로 바꾸기.
     return plays[aPerformance.playID];
-  };
+  }
 
-  const amountFor = (aPerformance) => {
+  function amountFor(aPerformance) {
     // 값이 바뀌지 않는 매개변수
     let result = 0; // 변수를 초기화 한다. 그리고 이름을 바꾸어준다.
     switch (playFor(aPerformance).type) {
@@ -83,28 +100,15 @@ const statement = (invoice, plays) => {
     }
 
     return result; // 함수 안에서 값이 바뀌는 변수
-  };
+  }
 
-  const volumeCreditsFor = (perf) => {
+  function volumeCreditsFor(perf) {
     let result = 0;
     result += Math.max(perf.audience - 30, 0);
     if ("comedy" === playFor(perf).type)
       result += Math.floor(perf.audience / 5);
     return result;
-  };
-
-  let result = `청구내역 (고객명 : ${invoice.customer})\n`;
-
-  for (let perf of invoice.performances) {
-    //청구내역을 출력한다.
-    result += `${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
-      perf.audience
-    }석)\n`;
   }
+}
 
-  result += `총액: ${usd(totalPee() / 100)}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
-  return result;
-};
-
-console.log(statement($invoices, $plays));
+console.log(renderPlainText($invoices, $plays));
