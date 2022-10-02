@@ -58,6 +58,6 @@ export default function createStatementData(invoice, plays) {
   }
 
   function totalPee(data) {
-    return data.performances.reduce((total, p) => total + p.amount);
+    return data.performances.reduce((total, p) => total + p.amount, 0);
   }
 }
