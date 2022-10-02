@@ -37,52 +37,13 @@ function statement(invoice, plays) {
   function enrichPerformance(aPerformance) {
     const result = Object.assign({}, aPerformance);
     result.play = playFor(result);
+    result.amount = amountFor(result);
     return result;
   }
 
   function playFor(aPerformance) {
     // 임시 변수를 질의 함수로 바꾸기.
     return plays[aPerformance.playID];
-  }
-}
-
-function renderPlainText(data, plays) {
-  let result = `청구내역 (고객명 : ${data.customer})\n`;
-
-  for (let perf of data.performances) {
-    //청구내역을 출력한다.
-    result += `${perf.play.name}: ${usd(amountFor(perf) / 100)} (${
-      perf.audience
-    }석)\n`;
-  }
-
-  result += `총액: ${usd(totalPee() / 100)}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
-  return result;
-
-  function totalPee() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += amountFor(perf);
-    }
-    return result;
-  }
-
-  function totalVolumeCredits() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += volumeCreditsFor(perf);
-    }
-    return result;
-  }
-
-  function usd(aNumber) {
-    // 매개변수 데이터타입을 적어주면 좋다.
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      minimumFactionDigits: 2,
-    }).format(aNumber);
   }
 
   function amountFor(aPerformance) {
@@ -109,6 +70,46 @@ function renderPlainText(data, plays) {
     }
 
     return result; // 함수 안에서 값이 바뀌는 변수
+  }
+}
+
+function renderPlainText(data, plays) {
+  let result = `청구내역 (고객명 : ${data.customer})\n`;
+
+  for (let perf of data.performances) {
+    //청구내역을 출력한다.
+    result += `${perf.play.name}: ${usd(perf.amount / 100)} (${
+      perf.audience
+    }석)\n`;
+  }
+
+  result += `총액: ${usd(totalPee() / 100)}\n`;
+  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+  return result;
+
+  function totalPee() {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.amount;
+    }
+    return result;
+  }
+
+  function totalVolumeCredits() {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += volumeCreditsFor(perf);
+    }
+    return result;
+  }
+
+  function usd(aNumber) {
+    // 매개변수 데이터타입을 적어주면 좋다.
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFactionDigits: 2,
+    }).format(aNumber);
   }
 
   function volumeCreditsFor(perf) {
