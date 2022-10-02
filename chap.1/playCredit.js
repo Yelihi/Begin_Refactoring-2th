@@ -32,12 +32,15 @@ function statement(invoice, plays) {
   const statementData = {};
   statementData.customer = invoice.customer;
   statementData.performances = invoice.performances.map(enrichPerformance);
+  statementData.totalVolumeCredits = totalVolumeCredits(statementData);
+  statementData.totalPee = totalPee(statementData);
   return renderPlainText(statementData, plays);
 
   function enrichPerformance(aPerformance) {
     const result = Object.assign({}, aPerformance);
     result.play = playFor(result);
     result.amount = amountFor(result);
+    result.volumeCredits = volumeCreditsFor(result);
     return result;
   }
 
@@ -71,6 +74,30 @@ function statement(invoice, plays) {
 
     return result; // 함수 안에서 값이 바뀌는 변수
   }
+
+  function volumeCreditsFor(aPerformance) {
+    let result = 0;
+    result += Math.max(aPerformance.audience - 30, 0);
+    if ("comedy" === aPerformance.play.type)
+      result += Math.floor(aPerformance.audience / 5);
+    return result;
+  }
+
+  function totalVolumeCredits(data) {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += volumeCreditsFor(perf);
+    }
+    return result;
+  }
+
+  function totalPee(data) {
+    let result = 0;
+    for (let perf of data.performances) {
+      result += perf.amount;
+    }
+    return result;
+  }
 }
 
 function renderPlainText(data, plays) {
@@ -83,25 +110,9 @@ function renderPlainText(data, plays) {
     }석)\n`;
   }
 
-  result += `총액: ${usd(totalPee() / 100)}\n`;
-  result += `적립 포인트: ${totalVolumeCredits()}점\n`;
+  result += `총액: ${usd(data.totalPee / 100)}\n`;
+  result += `적립 포인트: ${data.totalVolumeCredits}점\n`;
   return result;
-
-  function totalPee() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += perf.amount;
-    }
-    return result;
-  }
-
-  function totalVolumeCredits() {
-    let result = 0;
-    for (let perf of data.performances) {
-      result += volumeCreditsFor(perf);
-    }
-    return result;
-  }
 
   function usd(aNumber) {
     // 매개변수 데이터타입을 적어주면 좋다.
@@ -110,13 +121,6 @@ function renderPlainText(data, plays) {
       currency: "USD",
       minimumFactionDigits: 2,
     }).format(aNumber);
-  }
-
-  function volumeCreditsFor(perf) {
-    let result = 0;
-    result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
-    return result;
   }
 }
 
