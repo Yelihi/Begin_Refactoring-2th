@@ -28,16 +28,30 @@ const $plays = {
   "othe-llo": { name: "Othello", type: "tragedy" },
 };
 
-// function statement(invoice, plays) {
-//   return renderPlainText(invoice, plays);
-// }
+function statement(invoice, plays) {
+  const statementData = {};
+  statementData.customer = invoice.customer;
+  statementData.performances = invoice.performances.map(enrichPerformance);
+  return renderPlainText(statementData, plays);
 
-function renderPlainText(invoice, plays) {
-  let result = `청구내역 (고객명 : ${invoice.customer})\n`;
+  function enrichPerformance(aPerformance) {
+    const result = Object.assign({}, aPerformance);
+    result.play = playFor(result);
+    return result;
+  }
 
-  for (let perf of invoice.performances) {
+  function playFor(aPerformance) {
+    // 임시 변수를 질의 함수로 바꾸기.
+    return plays[aPerformance.playID];
+  }
+}
+
+function renderPlainText(data, plays) {
+  let result = `청구내역 (고객명 : ${data.customer})\n`;
+
+  for (let perf of data.performances) {
     //청구내역을 출력한다.
-    result += `${playFor(perf).name}: ${usd(amountFor(perf) / 100)} (${
+    result += `${perf.play.name}: ${usd(amountFor(perf) / 100)} (${
       perf.audience
     }석)\n`;
   }
@@ -48,7 +62,7 @@ function renderPlainText(invoice, plays) {
 
   function totalPee() {
     let result = 0;
-    for (let perf of invoice.performances) {
+    for (let perf of data.performances) {
       result += amountFor(perf);
     }
     return result;
@@ -56,7 +70,7 @@ function renderPlainText(invoice, plays) {
 
   function totalVolumeCredits() {
     let result = 0;
-    for (let perf of invoice.performances) {
+    for (let perf of data.performances) {
       result += volumeCreditsFor(perf);
     }
     return result;
@@ -71,15 +85,10 @@ function renderPlainText(invoice, plays) {
     }).format(aNumber);
   }
 
-  function playFor(aPerformance) {
-    // 임시 변수를 질의 함수로 바꾸기.
-    return plays[aPerformance.playID];
-  }
-
   function amountFor(aPerformance) {
     // 값이 바뀌지 않는 매개변수
     let result = 0; // 변수를 초기화 한다. 그리고 이름을 바꾸어준다.
-    switch (playFor(aPerformance).type) {
+    switch (aPerformance.play.type) {
       case "tragedy":
         result = 40000;
         if (aPerformance.audience > 30) {
@@ -95,7 +104,7 @@ function renderPlainText(invoice, plays) {
         break;
       default:
         throw new Error(
-          `알 수 없는 장르: ${JSON.stringify(playFor(aPerformance))}`
+          `알 수 없는 장르: ${JSON.stringify(aPerformance.play)}`
         );
     }
 
@@ -105,10 +114,9 @@ function renderPlainText(invoice, plays) {
   function volumeCreditsFor(perf) {
     let result = 0;
     result += Math.max(perf.audience - 30, 0);
-    if ("comedy" === playFor(perf).type)
-      result += Math.floor(perf.audience / 5);
+    if ("comedy" === perf.play.type) result += Math.floor(perf.audience / 5);
     return result;
   }
 }
 
-console.log(renderPlainText($invoices, $plays));
+console.log(statement($invoices, $plays));
